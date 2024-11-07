@@ -1,10 +1,12 @@
 import {ChangeEvent, FormEvent, useState} from "react"
 import {DrafTodo, ListTodo} from "./types/index"
+import TodoItem from "./components/TodoItem"
 
 function App() {
   const [taskItem, setTaskItem] = useState<DrafTodo>({
     text: "",
     completed: false,
+    createdTask: 0,
   })
   const [tasks, setTasks] = useState<ListTodo>([])
 
@@ -34,6 +36,7 @@ function App() {
       ...taskItem,
       completed: false,
       id: generateID(),
+      createdTask: Date.now(),
     }
 
     setTasks([...tasks, newTask])
@@ -41,7 +44,16 @@ function App() {
     setTaskItem({
       text: "",
       completed: false,
+      createdTask: 0,
     })
+  }
+
+  const toggleComplete = (id: string) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? {...task, completed: !task.completed} : task
+      )
+    )
   }
 
   return (
@@ -80,34 +92,11 @@ function App() {
 
         <div className="space-y-4 mt-3">
           {tasks.map((task) => (
-            <div
+            <TodoItem
               key={task.id}
-              className={`flex items-center p-4 rounded-lg shadow-sm ${
-                task.completed ? "bg-blue-100" : "bg-gray-100"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={() => {
-                  setTasks(
-                    tasks.map((t) =>
-                      t.id === task.id ? {...t, completed: !t.completed} : t
-                    )
-                  )
-                }}
-                className="mr-4"
-              />
-              <div className="flex-1">
-                <h2
-                  className={`text-gray-800 ${
-                    task.completed ? "line-through" : ""
-                  }`}
-                >
-                  {task.text}
-                </h2>
-              </div>
-            </div>
+              task={task}
+              toggleComplete={toggleComplete}
+            />
           ))}
         </div>
       </div>
