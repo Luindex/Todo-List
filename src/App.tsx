@@ -9,6 +9,8 @@ function App() {
     createdTask: 0,
   })
   const [tasks, setTasks] = useState<ListTodo>([])
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [filter, setFilter] = useState<string>("all") // Estado para el filtro
 
   const generateID = () => {
     const random = Math.random().toString(36).substr(2)
@@ -32,15 +34,24 @@ function App() {
       return
     }
 
-    const newTask = {
-      ...taskItem,
-      completed: false,
-      id: generateID(),
-      createdTask: Date.now(),
+    if (editingTaskId) {
+      // Editar tarea existente
+      setTasks(
+        tasks.map((task) =>
+          task.id === editingTaskId ? {...task, text: taskItem.text} : task
+        )
+      )
+      setEditingTaskId(null) // Salimos del modo edición
+    } else {
+      // Agregar nueva tarea
+      const newTask = {
+        ...taskItem,
+        completed: false,
+        id: generateID(),
+        createdTask: Date.now(),
+      }
+      setTasks([...tasks, newTask])
     }
-
-    setTasks([...tasks, newTask])
-
     setTaskItem({
       text: "",
       completed: false,
@@ -55,6 +66,24 @@ function App() {
       )
     )
   }
+
+  const editItem = (id: string) => {
+    const taskToEdit = tasks.find((task) => task.id === id)
+    if (taskToEdit) {
+      setTaskItem({
+        text: taskToEdit.text,
+        completed: taskToEdit.completed,
+        createdTask: taskToEdit.createdTask,
+      })
+      setEditingTaskId(id)
+    }
+  }
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "completed") return task.completed
+    if (filter === "incomplete") return !task.completed
+    return true
+  })
 
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-6">
@@ -78,24 +107,31 @@ function App() {
               type="submit"
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
-              Add Task
+              {editingTaskId ? "Save Changes" : "Add Task"}
             </button>
           </form>
         </div>
         <div className="flex items-center justify-between mb-">
-          <select className="bg-gray-200 mt-4 text-gray-700 p-2 rounded">
-            <option>All</option>
-            <option>Completed</option>
-            <option>Incomplete</option>
+          <select
+            className="bg-gray-200 mt-4 text-gray-700 p-2 rounded"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="incomplete">Incomplete</option>
           </select>
         </div>
 
         <div className="space-y-4 mt-3">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <TodoItem
               key={task.id}
               task={task}
               toggleComplete={toggleComplete}
+              setTasks={setTasks}
+              tasks={tasks}
+              editItem={editItem}
             />
           ))}
         </div>
