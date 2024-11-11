@@ -2,8 +2,6 @@
 
 Este es un proyecto de lista de tareas desarrollado con React, TypeScript, y Vite. La aplicación permite a los usuarios agregar, editar, eliminar y marcar tareas como completadas, además de filtrar las tareas según su estado.
 
-Currently, two official plugins are available:
-
 ## Funcionalidades
 
 - Agregar tareas: Permite crear una nueva tarea en la lista.
